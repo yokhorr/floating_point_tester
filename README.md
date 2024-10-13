@@ -3,7 +3,7 @@ Generate 100 tests of all operations to `tests/my_file.txt`:
 
 `python gen_test_file.py -f tests/my_file.txt -n 100 -o "+-*/"`
 
-Test `main.cpp` on `tests/my_file.txt`
+Test `main.cpp` on `tests/my_file.txt`:
 
 `python checker.py main.cpp -t tests/my_file.txt`
 
