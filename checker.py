@@ -22,6 +22,7 @@
 import subprocess
 import tqdm
 import argparse
+import datetime
 
 
 def parse_arguments():
@@ -122,7 +123,7 @@ def stress(runnable, rounding, operation):
 
 def main():
     print('\033[91m' + '***** By Egor Solyanik M3139: https://t.me/yokhor *****' + '\033[0m\n')
-    
+    print(f'Started testing on {datetime.datetime.now().strftime("%d.%m")} at {datetime.datetime.now().strftime("%H:%M")}')
     args = parse_arguments()
 
     runnable = compile_solution(args.solution)
