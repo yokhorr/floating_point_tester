@@ -21,7 +21,6 @@
 
 import subprocess
 import argparse
-from tqdm import tqdm
 
 
 def parse_args():
@@ -35,11 +34,13 @@ def parse_args():
 
 def main():
     args = parse_args()
+    print('Generating tests...')
     subprocess.run('clang++ gen.cpp -o gen.out', shell=True)
 
-    with open(args.f, 'a') as f:
-        for i in tqdm(range(args.n), desc='Generating tests'):
-            f.write(subprocess.check_output(['./gen.out'] + [args.r, args.o, str(i)]).decode())
+    with open(args.f, 'w') as f:
+        f.write(subprocess.check_output(['./gen.out'] + [args.r, args.o, str(args.n)]).decode())
+    
+    print('Done')
 
 
 if __name__ == '__main__':
