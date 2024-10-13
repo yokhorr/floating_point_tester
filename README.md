@@ -16,17 +16,17 @@ You need `clang++` installed to compile `gen.cpp`, otherwise change it to other 
 
 Check your programm on specified test file:
 
-`python checker.py <solution-t <tests.txt>`
+`python checker.py <solution> -t <tests.txt>`
 
 Run endless stress testing:
 
-`python checker.py <solution--stress`
+`python checker.py <solution> --stress`
 
 Specify rounding types and operations:
 
-`python checker.py <solution--stress --rounding <rounding--operation <operation>`
+`python checker.py <solution> --stress --rounding <rounding> --operation <operation>`
 
-`python checker.py <solution--stress -r <rounding-o <operation>`
+`python checker.py <solution> --stress -r <rounding> -o <operation>`
 
 Default rounding type is `1` and default operations are `+-*/`.
 **Rounding with other types for some reason don't correctly work with C++ built-in floats.**
