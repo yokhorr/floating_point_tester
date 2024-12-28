@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// 
 // Copyright (c) 2024 Egor Solyanik
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -56,14 +58,15 @@ char chooseOperation(const string &operations, mt19937& rng) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        cerr << "Usage: " << argv[0] << " <roundings> <operations> <iterations>" << endl;
+    if (argc != 5) {
+        cerr << "Usage: " << argv[0] << " <roundings> <operations> <iterations> <special>" << endl;
         return 1;
     }
 
     string roundings = argv[1];
     string operations = argv[2];
     const unsigned long long iterations = stoll(argv[3]);
+    bool special = argv[4][0] == '1';
 
     for (unsigned long long i = 0; i < iterations; ++i) {
         for (char c : roundings) {
@@ -91,6 +94,37 @@ int main(int argc, char* argv[]) {
         uniform_int_distribution<uint32_t> dist(0, 0xFFFFFFFF);
         u_A.i = dist(rng);
         u_B.i = dist(rng);
+
+        if (special) {
+            if (uniform_int_distribution<int>(0, 1)(rng) == 0) {
+                // denormal
+                if (uniform_real_distribution<float>(0, 1)(rng) < 0.6) {
+                    for (int i = 30; i >= 23; i--) {
+                        u_A.i &= ~(1 << i);
+                    }
+                }
+
+                if (uniform_real_distribution<float>(0, 1)(rng) < 0.4) {
+                    for (int i = 30; i >= 23; i--) {
+                        u_B.i &= ~(1 << i);
+                    }
+                }
+            } else {
+                // NaN
+                if (uniform_real_distribution<float>(0, 1)(rng) < 0.6) {
+                    for (int i = 30; i >= 23; i--) {
+                        u_A.i |= (1 << i);
+                    }
+                }
+
+                if (uniform_real_distribution<float>(0, 1)(rng) < 0.4) {
+                    for (int i = 30; i >= 23; i--) {
+                        u_B.i |= (1 << i);
+                    }
+                }
+            }
+        }
+
         A = u_A.f;
         B = u_B.f;
 
@@ -127,11 +161,12 @@ int main(int argc, char* argv[]) {
         } else {
             cout << operation;
         }
-        cout << " 0x" << hex << setfill('0') << setw(8) << u_B.i << " # ";
-        cout << "0x" << hex << uppercase << setfill('0') << setw(8) << u_result.i << endl;
-    }
 
-    
+        cout << " 0x" << hex << setfill('0') << setw(8) << u_B.i << " # ";
+        cout << hex << showbase << hexfloat << result << " ";
+        cout << "0x" << noshowbase << uppercase << setw(8) << setfill('0');
+        cout << uppercase << u_result.i << endl;
+    }
 
     return 0;
 }
