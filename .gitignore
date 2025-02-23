@@ -1,4 +1,3 @@
 .token
-out
+*.out
 stress_log.txt
-.idea

@@ -111,7 +111,7 @@ def test(test_file, runnable):
 def log_error(test, solution_output, answer):
     print()
     print("Failed test")
-    print(f'\t \033[91m{test.split("#")[0]}\033[0m')
+    print(f'\t \033[91m{test.split('#')[0]}\033[0m')
     print("Your output: ")
     print(f'\t {solution_output}')
     print("Correct output: ")
@@ -148,6 +148,8 @@ def stress(runnable, rounding, operation, special):
 
 
 def main():
+    # print('\033[91m' + '***** By Egor Solyanik M3139: https://t.me/yokhor *****' + '\033[0m\n')
+    
     args = parse_arguments()
 
     runnable = compile_solution(args.solution)
