@@ -1,5 +1,3 @@
-# SPDX-License-Identifier: MIT
-# 
 # Copyright (c) 2024 Egor Solyanik
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,6 +22,7 @@
 import subprocess
 import tqdm
 import argparse
+import datetime
 
 
 def parse_arguments():
@@ -33,14 +32,14 @@ def parse_arguments():
     parser.add_argument('solution', nargs='?', help='Program to check')
     group.add_argument('-t', '--test', help='Test file to check')
     group.add_argument('--stress', action='store_true', help='Stress testing mode')
-    parser.add_argument('-r', '--rounding', default='0123', help='Roundings to test')
+    parser.add_argument('-r', '--rounding', default='1', help='Roundings to test')
     parser.add_argument('-o', '--operation', default='+-*/', help='Operations to test')
-    parser.add_argument('--special', action='store_true', help='High probability of zero, inf, den and nan')
 
     return parser.parse_args()
 
 
 def compile_solution(solution):
+    runnable = ""
     if solution.endswith(".cpp"):
         runnable = f'./{solution[:-4]}.out'
         compile_cmd = f'clang++ {solution} -o {runnable}'
@@ -61,24 +60,6 @@ def compile_solution(solution):
     return runnable
 
 
-def validate_value(res):
-    if res == "0x0p+0":
-        res = "0x0.000000p+0"
-    elif res == "-0x0p+0":
-        res = "-0x0.000000p+0"
-    elif res.startswith("0x1p"):
-        res = "0x1.000000p" + res[res.index('p') + 1:]
-    elif res.startswith("-0x1p"):
-        res = "-0x1.000000p" + res[res.index('p') + 1:]
-    elif res == "-nan":
-        res = "nan"
-    elif ("nan" not in res) and ("inf" not in res):
-        l = len(res[res.index('.') + 1: res.index('p')])
-        if l < 6:
-            res = res[0:res.index('p')] + "0"*(6-l) + res[res.index('p'):]
-    return res
-
-
 def test(test_file, runnable):
     # Run tests
     with open(test_file, "r") as f:
@@ -88,10 +69,7 @@ def test(test_file, runnable):
     for test in tqdm.tqdm(tests, desc=f'Running {test_file}'):
         parts = test.split("#")
         cmd = f'{runnable} {parts[0].strip()}'
-        
-        value, hex = parts[-1].strip().split(" ")
-        value = validate_value(value)
-        correct_output = value + " " + hex
+        correct_output = parts[1].strip()
 
         # Run the test
         output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -100,8 +78,7 @@ def test(test_file, runnable):
         # Check if the test passed
         if actual_output != correct_output:
             if actual_output == "skip": continue
-            print(f"Test number {i} failed: \033[91m{parts[0].strip()}\033[0m\
-                  \n   Your output: {actual_output}\nCorrect output: {correct_output}")
+            print(f"Test number {i} failed: {test}\n   Your output: {actual_output}\nCorrect output: {correct_output}")
             break
         i += 1
     else:
@@ -111,7 +88,7 @@ def test(test_file, runnable):
 def log_error(test, solution_output, answer):
     print()
     print("Failed test")
-    print(f'\t \033[91m{test.split('#')[0]}\033[0m')
+    print(f'\t {test}')
     print("Your output: ")
     print(f'\t {solution_output}')
     print("Correct output: ")
@@ -119,43 +96,40 @@ def log_error(test, solution_output, answer):
     print()
 
 
-def stress(runnable, rounding, operation, special):
-    special = 1 if special else 0
+def stress(runnable, rounding, operation):
     with open("stress_log.txt", "w") as f:
         f.write("")
     i = 1
-
     while True:
-        test_cmd = f'./gen.out {rounding} "{operation}" 1 {special}'
+        test_cmd = f'./gen.out {rounding} "{operation}" 1'
         test = subprocess.run(test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip()
         parts = test.split("#")
 
-        value, hex = parts[-1].strip().split(" ")
-        value = validate_value(value)
-        answer = value + " " + hex
-        
-        solution_cmd = f'{runnable} {parts[0].strip()}'
+        answer = parts[1].strip()
+
+        solution_cmd = f'./{runnable} {parts[0].strip()}'
         solution_output = subprocess.run(solution_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip()
         if solution_output != answer:
+            if solution_output == "skip":
+                continue
             with open("stress_log.txt", "a") as f:
                 f.write(test)
                 f.write("\n")
             log_error(test, solution_output, answer)
-            break
         else:
             print(f'\rTests successfuly passed: {i}', end='')
         i += 1
 
 
 def main():
-    # print('\033[91m' + '***** By Egor Solyanik M3139: https://t.me/yokhor *****' + '\033[0m\n')
-    
+    print('\033[91m' + '***** By Egor Solyanik M3139: https://t.me/yokhor *****' + '\033[0m\n')
+    print(f'Started testing on {datetime.datetime.now().strftime("%d.%m")} at {datetime.datetime.now().strftime("%H:%M")}')
     args = parse_arguments()
 
     runnable = compile_solution(args.solution)
 
     if args.stress:
-        stress(runnable, args.rounding, args.operation, args.special)
+        stress(runnable, args.rounding, args.operation)
     elif args.test:
         test(args.test, runnable)
 
