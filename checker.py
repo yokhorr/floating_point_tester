@@ -130,9 +130,9 @@ def stress(runnable, rounding, operation, special):
         test = subprocess.run(test_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip()
         parts = test.split("#")
 
-        value = parts[-1].strip()
+        value, hex = parts[-1].strip().split(" ")
         value = validate_value(value)
-        answer = value
+        answer = value + " " + hex
         
         solution_cmd = f'{runnable} {parts[0].strip()}'
         solution_output = subprocess.run(solution_cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.decode("utf-8").strip()

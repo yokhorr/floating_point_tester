@@ -164,8 +164,8 @@ int main(int argc, char* argv[]) {
 
         cout << " 0x" << hex << setfill('0') << setw(8) << u_B.i << " # ";
         cout << hex << showbase << hexfloat << result << " ";
-//        cout << "0x" << noshowbase << uppercase << setw(8) << setfill('0');
-//        cout << uppercase << u_result.i << endl;
+        cout << "0x" << noshowbase << uppercase << setw(8) << setfill('0');
+        cout << uppercase << u_result.i << endl;
     }
 
     return 0;
