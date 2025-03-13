@@ -1,40 +1,39 @@
-# TLDR
-Generate 100 tests of all operations to `tests/my_file.txt`:
+Поддерживается только тестирование single precision floating point. Тестирование операций `mad` и `fma` не поддерживается.
 
-`python gen_test_file.py -f tests/my_file.txt -n 100 -o "+-*/"`
+___
 
-Test `main.cpp` on `tests/my_file.txt`:
+Сначала надо скомпилировать `gen.cpp` и `solid.cpp`.
 
-`python checker.py main.cpp -t tests/my_file.txt`
+Для Linux:
 
-Test `main.cpp` on stress tests:
+`g++ gen.cpp -o gen.out`
 
-`python checker.py main.cpp --stress`
+Для Windows:
 
-# Documentation
-You need `clang++` installed to compile `gen.cpp`, otherwise change it to other C++ compiler in [gen_test_file.py](gen_test_file.py) line 38.
+`g++ gen.cpp -o gen.exe`
 
-Check your programm on specified test file:
+Файл `solid.cpp` можно использовать как эталонное решение, правда, только для hex представления ответа.
 
-`python checker.py <solution> -t <tests.txt>`
+___
 
-Run endless stress testing:
+Запуск стресс-тестов:
 
-`python checker.py <solution> --stress`
+`python checker.py --stress [-r <rounding>] [-o <operation>] <solution>`
 
-Specify rounding types and operations:
+Например:
 
-`python checker.py <solution> --stress --rounding <rounding> --operation <operation>`
+`python checker.py --stress -r "012" -o "+-" main.out`
 
-`python checker.py <solution> --stress -r <rounding> -o <operation>`
+Если не указывать rounding и operation, по умолчанию тестируется всё.
 
-Default rounding type is `1` and default operations are `+-*/`.
-**Rounding with other types for some reason don't correctly work with C++ built-in floats.**
-I'll handle it later.
+Ещё есть флаг `--special`, при использовании которого с высокой вероятностью будут генерироваться денормализованные числа, NaN'ы и бесконечности:
 
-If errors occur during testing on file, they are printed immediately and testing process ends.
+`python checker.py --stress --special main.out`
 
-if errors occur during stress testing, they are saved in `stress_log.txt` file.
+Ошибки записываются в `stress_log.txt`, который очищается при очередном запуске стресс-тестов.
 
-Solutions are automatically compiled (if needed) and executed. Supported extensions: `.cpp`, `.py`, `.java`, `.out`
+___
 
+Есть также кастомные тесты на всякие частные случаи, но, к сожалению, ответы к ним есть только в hex представлении. Тем не менее, очень рекомендуется их запустить:
+
+`python checker.py --test tests/custom.txt main.out`
